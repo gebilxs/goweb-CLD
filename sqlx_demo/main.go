@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
@@ -9,10 +10,32 @@ import (
 
 var db *sqlx.DB
 
-type user struct {
-	ID   int
-	Name string
-	Age  int
+type User struct {
+	ID   int    `db:"id"`
+	Name string `db:"name"`
+	Age  int    `db:"age"`
+}
+
+func (u User) Value() (driver.Value, error) {
+	return []interface{}{u.Name, u.Age}, nil
+}
+
+// BatchInsertUsers2 使用sqlx.In帮我们拼接语句和参数, 注意传入的参数是[]interface{}
+func BatchInsertUsers2(users []interface{}) error {
+	query, args, _ := sqlx.In(
+		"INSERT INTO user (name, age) VALUES (?), (?)",
+		users..., // 如果arg实现了 driver.Valuer, sqlx.In 会通过调用 Value()来展开它
+	)
+	fmt.Println(query) // 查看生成的querystring
+	fmt.Println(args)  // 查看生成的args
+	_, err := db.Exec(query, args...)
+	return err
+}
+
+// BatchInsertUsers3 使用NamedExec实现批量插入
+func BatchInsertUsers3(users []*User) error {
+	_, err := db.NamedExec("INSERT INTO user (name, age) VALUES (:name, :age)", users)
+	return err
 }
 
 func initDB() (err error) {
@@ -31,7 +54,7 @@ func initDB() (err error) {
 // 查询单条数据示例
 func queryRowDemo() {
 	sqlStr := "select id, name, age from user where id=?"
-	var u user
+	var u User
 	err := db.Get(&u, sqlStr, 1)
 	if err != nil {
 		fmt.Printf("get failed, err:%v\n", err)
@@ -43,7 +66,7 @@ func queryRowDemo() {
 // 查询多条数据示例
 func queryMultiRowDemo() {
 	sqlStr := "select id, name, age from user where id > ?"
-	var users []user
+	var users []User
 	err := db.Select(&users, sqlStr, 0)
 	if err != nil {
 		fmt.Printf("query failed, err:%v\n", err)
@@ -122,7 +145,7 @@ func namedQuery() {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var u user
+		var u User
 		err := rows.StructScan(&u)
 		if err != nil {
 			fmt.Printf("scan failed, err:%v\n", err)
@@ -131,7 +154,7 @@ func namedQuery() {
 		fmt.Printf("user:%#v\n", u)
 	}
 
-	u := user{
+	u := User{
 		Name: "七米",
 	}
 	// 使用结构体命名查询，根据结构体字段的 db tag进行映射
@@ -142,7 +165,7 @@ func namedQuery() {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var u user
+		var u User
 		err := rows.StructScan(&u)
 		if err != nil {
 			fmt.Printf("scan failed, err:%v\n", err)
@@ -200,6 +223,19 @@ func transactionDemo2() (err error) {
 	return err
 }
 
+// QueryByIDs 根据给定ID查询
+func QueryByIDs(ids []int) (users []User, err error) {
+	// 动态填充id
+	query, args, err := sqlx.In("SELECT name, age FROM user WHERE id IN (?)", ids)
+	if err != nil {
+		return
+	}
+	// sqlx.In 返回带 `?` bindvar的查询语句, 我们使用Rebind()重新绑定它
+	query = db.Rebind(query)
+
+	err = db.Select(&users, query, args...)
+	return
+}
 func main() {
 	if err := initDB(); err != nil {
 		fmt.Printf("init DB failed,err:%v\n", err)
@@ -211,6 +247,21 @@ func main() {
 	//insertRowDemo()
 	//updateRowDemo()
 	//deleteRowDemo()
-	insertUserDemo()
-	queryMultiRowDemo()
+	//insertUserDemo()
+
+	// test 批量插入
+	//u1 := User{Name: "xx", Age: 10}
+	//u2 := User{Name: "xxx", Age: 20}
+	//users := []interface{}{u1, u2}
+	//BatchInsertUsers2(users)
+
+	//指定查询
+	users, err := QueryByIDs([]int{1, 7})
+	if err != nil {
+		fmt.Printf("QueryByIDs,failed,%v\n", err)
+	}
+	for _, user := range users {
+		fmt.Printf("user:%#v\n", user)
+	}
+	//queryMultiRowDemo()
 }
