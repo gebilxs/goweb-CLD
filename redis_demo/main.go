@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/go-redis/redis"
+	"time"
 )
 
 //声明一个全局的rdb变量
@@ -111,6 +112,27 @@ func redisExample2() {
 		fmt.Println(z.Member, z.Score)
 	}
 }
+func watchdemo() {
+	// 监视watch_count的值，并在值不变的前提下将其值+1
+	key := "watch_count"
+	err := rdb.Watch(func(tx *redis.Tx) error {
+		n, err := tx.Get(key).Int()
+		if err != nil && err != redis.Nil {
+			return err
+		}
+		_, err = tx.Pipelined(func(pipe redis.Pipeliner) error {
+			time.Sleep(time.Second)
+			pipe.Set(key, n+1, 0)
+			return nil
+		})
+		return err
+	}, key)
+	if err != nil {
+		fmt.Printf("tx exec failed,err:%v\n", err)
+		return
+	}
+	fmt.Println("tx exec succeeded")
+}
 func main() {
 	if err := initClient(); err != nil {
 		fmt.Printf("init redis client failed,err:%v\n", err)
@@ -122,5 +144,6 @@ func main() {
 
 	//redisExample
 	//hgetDemo()
-	redisExample2()
+	//redisExample2()
+	watchdemo()
 }
