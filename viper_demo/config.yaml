@@ -1,2 +1,7 @@
 port: 8070
 version: "v0.1"
+
+mysql:
+  host: "127.0.0.1"
+  port: 13006
+  dbname: "sql_demo"

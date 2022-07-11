@@ -2,13 +2,22 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/gin-gonic/gin"
-
 	"github.com/spf13/viper"
 )
+
+type Config struct {
+	Port        int    `mapstructure:"port"`
+	Version     string `mapstructure:"version"`
+	MySQLConfig `mapstructure:"mysql"`
+}
+
+type MySQLConfig struct {
+	Host   string `mapstructure:"host"`
+	DbName string `mapstructure:"dbname"`
+	Port   int    `mapstructure:"port"`
+}
 
 func main() {
 	//设置默认值
@@ -32,9 +41,17 @@ func main() {
 		fmt.Println("Config file changed:", e.Name)
 	})
 
-	r := gin.Default()
-	r.GET("/version", func(c *gin.Context) {
-		c.String(http.StatusOK, viper.GetString("version"))
-	})
-	r.Run(":8070")
+	//输出yaml中的相关数据
+	var c Config
+	if err := viper.Unmarshal(&c); err != nil {
+		fmt.Printf("viper.Unmarshal error: %v\n", err)
+		return
+	}
+	fmt.Printf("c:%#v\n", c)
+
+	//r := gin.Default()
+	//r.GET("/version", func(c *gin.Context) {
+	//	c.String(http.StatusOK, viper.GetString("version"))
+	//})
+	//r.Run(":8070")
 }
