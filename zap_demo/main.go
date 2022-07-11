@@ -34,13 +34,14 @@ func main() {
 	r.GET("/hello", func(c *gin.Context) {
 		c.String(http.StatusOK, "hello world!")
 	})
-	r.Run(":8090")
+	r.Run(":8080")
 }
 func InitLogger() {
 	writeSyncer := getLogWriter()
 	encoder := getEncoder()
 	core := zapcore.NewCore(encoder, writeSyncer, zapcore.DebugLevel)
-
+	//logger, _ = zap.NewProduction()
+	logger, _ = zap.NewDevelopment()
 	logger := zap.New(core, zap.AddCaller())
 	sugarLogger = logger.Sugar()
 }

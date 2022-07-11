@@ -41,11 +41,12 @@ package main
 //	r.Run()
 //}
 //
-////func InitLogger() {
-////	//logger, _ = zap.NewProduction()
-////	logger, _ = zap.NewDevelopment()
-////	sugarLogger = logger.Sugar()
-////}
+//func InitLogger() {
+//	//logger, _ = zap.NewProduction()
+//	logger, _ = zap.NewDevelopment()
+//	sugarLogger = logger.Sugar()
+//}
+
 //func InitLogger() {
 //	writeSyncer := getLogWriter()
 //	encoder := getEncoder()
