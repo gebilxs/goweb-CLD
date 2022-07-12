@@ -2,6 +2,7 @@ app:
   name: "web_CLD"
   mode: "dev"
   port: 8081
+  version: "v1.0.0"
 
 log:
   level: "debug"

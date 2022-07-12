@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"goweb-CLD/web_CLD/setting"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -18,12 +19,12 @@ import (
 )
 
 // InitLogger 初始化Logger
-func Init() (err error) {
+func Init(cfg *setting.LogConfig) (err error) {
 	writeSyncer := getLogWriter(
-		viper.GetString("log.filename"),
-		viper.GetInt("log.max_size"),
-		viper.GetInt("log.max_backups"),
-		viper.GetInt("log.max_age"),
+		cfg.Filename,
+		cfg.MaxSize,
+		cfg.MaxAge,
+		cfg.MaxBackups,
 	)
 	encoder := getEncoder()
 	var l = new(zapcore.Level)

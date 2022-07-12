@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"fmt"
+	"goweb-CLD/web_CLD/setting"
 	"time"
 
 	"go.uber.org/zap"
@@ -14,13 +15,18 @@ import (
 
 var db *sqlx.DB
 
-func Init() (err error) {
+func Init(cfg *setting.MySQLConfig) (err error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
-		viper.GetString("mysql.user"),
-		viper.GetString("mysql.password"),
-		viper.GetString("mysql.host"),
-		viper.GetInt("mysql.port"),
-		viper.GetString("mysql.dbname"),
+		//viper.GetString("mysql.user"),
+		//viper.GetString("mysql.password"),
+		//viper.GetString("mysql.host"),
+		//viper.GetInt("mysql.port"),
+		//viper.GetString("mysql.dbname"),
+		cfg.User,
+		cfg.Password,
+		cfg.Host,
+		cfg.Port,
+		cfg.DbName,
 	)
 	//这里需要去初始化，而不是去新声明一个变量
 	db, err = sqlx.Connect("mysql", dsn)
