@@ -9,13 +9,16 @@ require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/jmoiron/sqlx v1.3.5
+	github.com/juju/ratelimit v1.0.2
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/spf13/viper v1.12.0
+	go.uber.org/ratelimit v0.2.0
 	go.uber.org/zap v1.21.0
 )
 
 require (
 	github.com/BurntSushi/toml v1.1.0 // indirect
+	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
